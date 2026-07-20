@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Frontend module - AWS Amplify Hosting for the React + Vite to-do app
+  (BEM17-serverless-todo-app-frontend). Amplify builds the app on every
+  push to the connected branch and injects the backend's API URL and
+  Cognito IDs as build-time environment variables.
+  The GitHub AccessToken is never stored in this template - supply it at
+  deploy time, e.g. `sam deploy --parameter-overrides AccessToken=<token>`.
+
+Parameters:
+  AppName:
+    Type: String
+  Repository:
+    Type: String
+    Default: https://github.com/wodoame/BEM17-serverless-todo-app-frontend
+  AccessToken:
+    Type: String
+    NoEcho: true
+  ApiUrl:
+    Type: String
+  UserPoolId:
+    Type: String
+  UserPoolClientId:
+    Type: String
+
+Resources:
+  AmplifyApp:
+    Type: AWS::Amplify::App
+    Properties:
+      Name: !Sub ${AppName}-frontend
+      Repository: !Ref Repository
+      AccessToken: !Ref AccessToken
+      Platform: WEB
+      BuildSpec: |
+        version: 1
+        frontend:
+          phases:
+            preBuild:
+              commands:
+                - npm install
+            build:
+              commands:
+                - npm run build
+          artifacts:
+            baseDirectory: dist
+            files:
+              - '**/*'
+          cache:
+            paths:
+              - node_modules/**/*
+      EnvironmentVariables:
+        - Name: VITE_API_URL
+          Value: !Ref ApiUrl
+        - Name: VITE_USER_POOL_ID
+          Value: !Ref UserPoolId
+        - Name: VITE_USER_POOL_CLIENT_ID
+          Value: !Ref UserPoolClientId
+      CustomRules:
+        - Source: /<*>
+          Target: /index.html
+          Status: '200'
+
+  MainBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      AppId: !GetAtt AmplifyApp.AppId
+      BranchName: main
+      EnableAutoBuild: true
+      Stage: PRODUCTION
+
+Outputs:
+  AmplifyAppId:
+    Value: !GetAtt AmplifyApp.AppId
+  AmplifyUrl:
+    Value: !Sub https://${MainBranch.BranchName}.${AmplifyApp.DefaultDomain}

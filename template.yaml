@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Serverless To-Do App with Event-Driven Expiry Processing.
+  Root stack wiring together modular nested stacks (auth, database,
+  compute, messaging, events, api, frontend) as they are added.
+
+Parameters:
+  AppName:
+    Type: String
+    Default: todo-app
+  FrontendAccessToken:
+    Type: String
+    NoEcho: true
+    Description: >-
+      GitHub personal access token Amplify uses to pull/build the frontend
+      repo. Supply at deploy time only, e.g. `sam deploy
+      --parameter-overrides FrontendAccessToken=<token>` - never commit
+      this value.
+
+Resources:
+  DatabaseStack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: modules/database/template.yaml
+      Parameters:
+        AppName: !Ref AppName
+
+  MessagingStack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: modules/messaging/template.yaml
+      Parameters:
+        AppName: !Ref AppName
+        TasksTableStreamArn: !GetAtt DatabaseStack.Outputs.StreamArn
+        ScheduleGroupName: !Sub ${AppName}-expiry
+
+  AuthStack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: modules/auth/template.yaml
+      Parameters:
+        AppName: !Ref AppName
+        PostAuthenticationFunctionArn: !GetAtt MessagingStack.Outputs.PostAuthenticationFunctionArn
+
+  EventsStack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: modules/events/template.yaml
+      Parameters:
+        AppName: !Ref AppName
+        ScheduleGroupName: !Sub ${AppName}-expiry
+        NotificationsTopicArn: !GetAtt MessagingStack.Outputs.NotificationsTopicArn
+        TasksTableName: !GetAtt DatabaseStack.Outputs.TableName
+        TasksTableArn: !GetAtt DatabaseStack.Outputs.TableArn
+
+  ComputeStack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: modules/compute/template.yaml
+      Parameters:
+        AppName: !Ref AppName
+        UserPoolArn: !GetAtt AuthStack.Outputs.UserPoolArn
+        TasksTableName: !GetAtt DatabaseStack.Outputs.TableName
+        TasksTableArn: !GetAtt DatabaseStack.Outputs.TableArn
+        ScheduleGroupName: !Sub ${AppName}-expiry
+        SchedulerRoleArn: !GetAtt EventsStack.Outputs.SchedulerExecutionRoleArn
+        ExpiryFunctionArn: !GetAtt EventsStack.Outputs.ExpiryHandlerFunctionArn
+
+  FrontendStack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: modules/frontend/template.yaml
+      Parameters:
+        AppName: !Ref AppName
+        AccessToken: !Ref FrontendAccessToken
+        ApiUrl: !GetAtt ComputeStack.Outputs.ApiUrl
+        UserPoolId: !GetAtt AuthStack.Outputs.UserPoolId
+        UserPoolClientId: !GetAtt AuthStack.Outputs.UserPoolClientId
+
+Outputs:
+  UserPoolId:
+    Value: !GetAtt AuthStack.Outputs.UserPoolId
+  UserPoolArn:
+    Value: !GetAtt AuthStack.Outputs.UserPoolArn
+  UserPoolClientId:
+    Value: !GetAtt AuthStack.Outputs.UserPoolClientId
+  TasksTableName:
+    Value: !GetAtt DatabaseStack.Outputs.TableName
+  TasksTableArn:
+    Value: !GetAtt DatabaseStack.Outputs.TableArn
+  TasksTableStreamArn:
+    Value: !GetAtt DatabaseStack.Outputs.StreamArn
+  ApiUrl:
+    Value: !GetAtt ComputeStack.Outputs.ApiUrl
+  NotificationsTopicArn:
+    Value: !GetAtt MessagingStack.Outputs.NotificationsTopicArn
+  CancellationQueueArn:
+    Value: !GetAtt MessagingStack.Outputs.CancellationQueueArn
+  ScheduleGroupName:
+    Value: !GetAtt EventsStack.Outputs.ScheduleGroupName
+  ExpiryHandlerFunctionArn:
+    Value: !GetAtt EventsStack.Outputs.ExpiryHandlerFunctionArn
+  AmplifyUrl:
+    Value: !GetAtt FrontendStack.Outputs.AmplifyUrl

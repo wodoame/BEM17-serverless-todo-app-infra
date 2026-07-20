@@ -1,0 +1,184 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Compute module - CRUD Lambda functions for tasks, exposed through a
+  Cognito-authorized API Gateway REST API. Each function has its own
+  least-privilege IAM policy scoped to the single DynamoDB action it needs.
+
+Parameters:
+  AppName:
+    Type: String
+  UserPoolArn:
+    Type: String
+  TasksTableName:
+    Type: String
+  TasksTableArn:
+    Type: String
+  ScheduleGroupName:
+    Type: String
+  SchedulerRoleArn:
+    Type: String
+  ExpiryFunctionArn:
+    Type: String
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 10
+    MemorySize: 128
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref TasksTableName
+
+Resources:
+  TasksApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub ${AppName}-api
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,PATCH,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !Ref UserPoolArn
+
+  CommonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub ${AppName}-common
+      ContentUri: src/layer
+      CompatibleRuntimes:
+        - python3.12
+      RetentionPolicy: Delete
+
+  CreateTaskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-create-task
+      CodeUri: src/create_task/
+      Handler: app.handler
+      Layers:
+        - !Ref CommonLayer
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TasksTableName
+          SCHEDULE_GROUP_NAME: !Ref ScheduleGroupName
+          SCHEDULER_ROLE_ARN: !Ref SchedulerRoleArn
+          EXPIRY_FUNCTION_ARN: !Ref ExpiryFunctionArn
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:PutItem
+              Resource: !Ref TasksTableArn
+            - Effect: Allow
+              Action: scheduler:CreateSchedule
+              Resource: !Sub arn:${AWS::Partition}:scheduler:${AWS::Region}:${AWS::AccountId}:schedule/${ScheduleGroupName}/*
+            - Effect: Allow
+              Action: iam:PassRole
+              Resource: !Ref SchedulerRoleArn
+              Condition:
+                StringEquals:
+                  iam:PassedToService: scheduler.amazonaws.com
+      Events:
+        CreateTask:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TasksApi
+            Path: /tasks
+            Method: post
+
+  ListTasksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-list-tasks
+      CodeUri: src/list_tasks/
+      Handler: app.handler
+      Layers:
+        - !Ref CommonLayer
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:Query
+              Resource:
+                - !Ref TasksTableArn
+                - !Sub ${TasksTableArn}/index/StatusIndex
+      Events:
+        ListTasks:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TasksApi
+            Path: /tasks
+            Method: get
+
+  GetTaskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-get-task
+      CodeUri: src/get_task/
+      Handler: app.handler
+      Layers:
+        - !Ref CommonLayer
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:GetItem
+              Resource: !Ref TasksTableArn
+      Events:
+        GetTask:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TasksApi
+            Path: /tasks/{taskId}
+            Method: get
+
+  UpdateTaskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-update-task
+      CodeUri: src/update_task/
+      Handler: app.handler
+      Layers:
+        - !Ref CommonLayer
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:UpdateItem
+              Resource: !Ref TasksTableArn
+      Events:
+        UpdateTask:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TasksApi
+            Path: /tasks/{taskId}
+            Method: patch
+
+  DeleteTaskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-delete-task
+      CodeUri: src/delete_task/
+      Handler: app.handler
+      Layers:
+        - !Ref CommonLayer
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:DeleteItem
+              Resource: !Ref TasksTableArn
+      Events:
+        DeleteTask:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TasksApi
+            Path: /tasks/{taskId}
+            Method: delete
+
+Outputs:
+  ApiId:
+    Value: !Ref TasksApi
+  ApiUrl:
+    Value: !Sub https://${TasksApi}.execute-api.${AWS::Region}.amazonaws.com/prod/

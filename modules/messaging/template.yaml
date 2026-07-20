@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Messaging module - SNS topic for task notifications, and the decoupled,
+  idempotent expiry-cancellation pipeline (DynamoDB Streams -> SQS FIFO ->
+  Lambda) that cancels a task's scheduled expiry when it is Completed or
+  Deleted before its deadline. Cancellation deletes an EventBridge
+  Scheduler schedule named "task-{TaskId}" in the given schedule group;
+  the events module (not yet built) must create schedules under that same
+  name/group when a task is created.
+
+Parameters:
+  AppName:
+    Type: String
+  TasksTableStreamArn:
+    Type: String
+  ScheduleGroupName:
+    Type: String
+
+Resources:
+  NotificationsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${AppName}-notifications
+
+  PostAuthenticationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-post-authentication
+      CodeUri: src/post_authentication/
+      Handler: app.handler
+      Runtime: python3.12
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          TOPIC_ARN: !Ref NotificationsTopic
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: sns:Subscribe
+              Resource: !Ref NotificationsTopic
+
+  CancellationDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AppName}-cancellation-dlq.fifo
+      FifoQueue: true
+
+  CancellationQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AppName}-cancellation.fifo
+      FifoQueue: true
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt CancellationDeadLetterQueue.Arn
+        maxReceiveCount: 5
+
+  StreamProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-stream-processor
+      CodeUri: src/stream_processor/
+      Handler: app.handler
+      Runtime: python3.12
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          QUEUE_URL: !Ref CancellationQueue
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: sqs:SendMessage
+              Resource: !GetAtt CancellationQueue.Arn
+      Events:
+        TasksStream:
+          Type: DynamoDB
+          Properties:
+            Stream: !Ref TasksTableStreamArn
+            StartingPosition: LATEST
+            BatchSize: 10
+            MaximumRetryAttempts: 3
+            FilterCriteria:
+              Filters:
+                - Pattern: '{"eventName": ["MODIFY", "REMOVE"]}'
+
+  CancellationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-cancel-expiry
+      CodeUri: src/cancel_expiry/
+      Handler: app.handler
+      Runtime: python3.12
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          SCHEDULE_GROUP_NAME: !Ref ScheduleGroupName
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: scheduler:DeleteSchedule
+              Resource: !Sub arn:${AWS::Partition}:scheduler:${AWS::Region}:${AWS::AccountId}:schedule/${ScheduleGroupName}/*
+      Events:
+        CancellationQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt CancellationQueue.Arn
+            BatchSize: 1
+
+Outputs:
+  NotificationsTopicArn:
+    Value: !Ref NotificationsTopic
+  PostAuthenticationFunctionArn:
+    Value: !GetAtt PostAuthenticationFunction.Arn
+  CancellationQueueArn:
+    Value: !GetAtt CancellationQueue.Arn
+  CancellationQueueUrl:
+    Value: !Ref CancellationQueue

@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Database module - single DynamoDB table storing to-do tasks.
+  Partitioned by UserId so a user's tasks are co-located, with a
+  StatusIndex GSI to efficiently list a user's Pending/Completed/Expired
+  tasks. Streams are enabled (NEW_AND_OLD_IMAGES) for the cancellation
+  workflow that reacts to status transitions before a task's deadline.
+
+Parameters:
+  AppName:
+    Type: String
+
+Resources:
+  TasksTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${AppName}-tasks
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: UserId
+          AttributeType: S
+        - AttributeName: TaskId
+          AttributeType: S
+        - AttributeName: Status
+          AttributeType: S
+      KeySchema:
+        - AttributeName: UserId
+          KeyType: HASH
+        - AttributeName: TaskId
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: StatusIndex
+          KeySchema:
+            - AttributeName: UserId
+              KeyType: HASH
+            - AttributeName: Status
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+Outputs:
+  TableName:
+    Value: !Ref TasksTable
+  TableArn:
+    Value: !GetAtt TasksTable.Arn
+  StreamArn:
+    Value: !GetAtt TasksTable.StreamArn

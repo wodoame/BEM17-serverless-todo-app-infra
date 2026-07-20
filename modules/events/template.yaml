@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Events module - EventBridge Scheduler group and execution role used to
+  fire one-time, per-task expiry schedules (created by the compute module
+  when a task is made, cancelled by the messaging module's cancellation
+  pipeline). ExpiryHandlerFunction flips a still-Pending task to Expired
+  and publishes a notification to the shared SNS topic, filtered to the
+  task owner via a UserId message attribute.
+
+Parameters:
+  AppName:
+    Type: String
+  ScheduleGroupName:
+    Type: String
+  NotificationsTopicArn:
+    Type: String
+  TasksTableName:
+    Type: String
+  TasksTableArn:
+    Type: String
+
+Resources:
+  ScheduleGroup:
+    Type: AWS::Scheduler::ScheduleGroup
+    Properties:
+      Name: !Ref ScheduleGroupName
+
+  ExpiryHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-expiry-handler
+      CodeUri: src/expiry_handler/
+      Handler: app.handler
+      Runtime: python3.12
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TasksTableName
+          TOPIC_ARN: !Ref NotificationsTopicArn
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:UpdateItem
+              Resource: !Ref TasksTableArn
+            - Effect: Allow
+              Action: sns:Publish
+              Resource: !Ref NotificationsTopicArn
+
+  SchedulerExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AppName}-scheduler-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: scheduler.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+      Policies:
+        - PolicyName: InvokeExpiryHandler
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt ExpiryHandlerFunction.Arn
+
+Outputs:
+  ScheduleGroupName:
+    Value: !Ref ScheduleGroup
+  SchedulerExecutionRoleArn:
+    Value: !GetAtt SchedulerExecutionRole.Arn
+  ExpiryHandlerFunctionArn:
+    Value: !GetAtt ExpiryHandlerFunction.Arn
