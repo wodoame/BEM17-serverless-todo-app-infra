@@ -51,7 +51,6 @@ Resources:
   SchedulerExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AppName}-scheduler-role
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:

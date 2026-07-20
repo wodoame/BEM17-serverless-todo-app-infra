@@ -42,6 +42,9 @@ Resources:
         AllowOrigin: "'*'"
       Auth:
         DefaultAuthorizer: CognitoAuthorizer
+        # CORS preflight (OPTIONS) requests carry no token; keep them public
+        # so the browser preflight succeeds and the real request is sent.
+        AddDefaultAuthorizerToCorsPreflight: false
         Authorizers:
           CognitoAuthorizer:
             UserPoolArn: !Ref UserPoolArn

@@ -57,7 +57,10 @@ Resources:
         - Name: VITE_USER_POOL_CLIENT_ID
           Value: !Ref UserPoolClientId
       CustomRules:
-        - Source: /<*>
+        # SPA rewrite: send only extension-less route paths (e.g. /sign-in) to
+        # index.html; real static assets (.js/.css/…) must be served as-is, or
+        # the browser rejects them for a text/html MIME type.
+        - Source: '</^[^.]+$|\.(?!(css|gif|ico|jpg|js|mjs|png|txt|svg|woff|woff2|ttf|map|json|webp)$)([^.]+$)/>'
           Target: /index.html
           Status: '200'
 
