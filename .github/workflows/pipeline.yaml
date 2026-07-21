@@ -1,0 +1,87 @@
+name: Pipeline
+
+on:
+  push:
+    branches:
+      - 'main'
+
+env:
+  SAM_TEMPLATE: template.yaml
+  TESTING_STACK_NAME: serverless-todo-app-test
+  TESTING_APP_NAME: serverless-todo-app-test
+  TESTING_PIPELINE_EXECUTION_ROLE: arn:aws:iam::205930639565:role/aws-sam-cli-managed-test-pipe-PipelineExecutionRole-MeJc1QQbGhzR
+  TESTING_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::205930639565:role/aws-sam-cli-managed-test--CloudFormationExecutionRo-HcNxZMDU1rIK
+  TESTING_ARTIFACTS_BUCKET: aws-sam-cli-managed-test-pipeline--artifactsbucket-4wg6z15t2udq
+  TESTING_REGION: us-east-1
+  PROD_STACK_NAME: serverless-todo-app
+  PROD_APP_NAME: serverless-todo-app
+  PROD_PIPELINE_EXECUTION_ROLE: arn:aws:iam::205930639565:role/aws-sam-cli-managed-prod-pipe-PipelineExecutionRole-8CPofylk4jq2
+  PROD_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::205930639565:role/aws-sam-cli-managed-prod--CloudFormationExecutionRo-6acTOS2GRSz8
+  PROD_ARTIFACTS_BUCKET: aws-sam-cli-managed-prod-pipeline--artifactsbucket-vwh2aeanofxp
+  PROD_REGION: us-east-1
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-testing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: Build resources
+        run: sam build --template ${SAM_TEMPLATE} --use-container
+
+      - name: Assume the testing pipeline execution role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.TESTING_REGION }}
+          role-to-assume: ${{ env.TESTING_PIPELINE_EXECUTION_ROLE }}
+          role-session-name: testing-deployment
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+
+      - name: Deploy to testing stack
+        run: |
+          sam deploy --stack-name ${TESTING_STACK_NAME} \
+            --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
+            --region ${TESTING_REGION} \
+            --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
+            --no-fail-on-empty-changeset \
+            --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
+            --parameter-overrides AppName=${TESTING_APP_NAME} FrontendAccessToken=${{ secrets.FRONTEND_ACCESS_TOKEN }}
+
+  deploy-prod:
+    needs: [deploy-testing]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: Build resources
+        run: sam build --template ${SAM_TEMPLATE} --use-container
+
+      - name: Assume the prod pipeline execution role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.PROD_REGION }}
+          role-to-assume: ${{ env.PROD_PIPELINE_EXECUTION_ROLE }}
+          role-session-name: prod-deployment
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+
+      - name: Deploy to production stack
+        run: |
+          sam deploy --stack-name ${PROD_STACK_NAME} \
+            --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
+            --region ${PROD_REGION} \
+            --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
+            --no-fail-on-empty-changeset \
+            --role-arn ${PROD_CLOUDFORMATION_EXECUTION_ROLE} \
+            --parameter-overrides AppName=${PROD_APP_NAME} FrontendAccessToken=${{ secrets.FRONTEND_ACCESS_TOKEN }}
