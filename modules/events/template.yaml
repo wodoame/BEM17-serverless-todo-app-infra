@@ -21,11 +21,13 @@ Parameters:
     Type: String
 
 Resources:
+  # Groups the per-task one-time expiry schedules created by the compute module
   ScheduleGroup:
     Type: AWS::Scheduler::ScheduleGroup
     Properties:
       Name: !Ref ScheduleGroupName
 
+  # Lambda invoked by a task's schedule; flips a still-Pending task to Expired and notifies its owner
   ExpiryHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -48,6 +50,7 @@ Resources:
               Action: sns:Publish
               Resource: !Ref NotificationsTopicArn
 
+  # Role EventBridge Scheduler assumes to invoke ExpiryHandlerFunction from each task's schedule
   SchedulerExecutionRole:
     Type: AWS::IAM::Role
     Properties:

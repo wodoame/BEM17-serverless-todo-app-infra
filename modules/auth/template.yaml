@@ -13,6 +13,7 @@ Parameters:
     Type: String
 
 Resources:
+  # Cognito user pool that stores and authenticates to-do app users
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
@@ -37,6 +38,7 @@ Resources:
           Required: true
           Mutable: true
 
+  # App client the front end uses to sign users in against the user pool
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -44,10 +46,10 @@ Resources:
       UserPoolId: !Ref UserPool
       GenerateSecret: false
       ExplicitAuthFlows:
-        - ALLOW_USER_PASSWORD_AUTH
         - ALLOW_USER_SRP_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
 
+  # Lets Cognito invoke the messaging module's PostAuthentication function
   PostAuthenticationInvokePermission:
     Type: AWS::Lambda::Permission
     Properties:
@@ -56,6 +58,7 @@ Resources:
       Principal: cognito-idp.amazonaws.com
       SourceArn: !GetAtt UserPool.Arn
 
+  # Lambda that auto-confirms new sign-ups and auto-verifies their email
   PreSignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -66,6 +69,7 @@ Resources:
       Timeout: 5
       MemorySize: 128
 
+  # Lets Cognito invoke the PreSignUpFunction during sign-up
   PreSignUpInvokePermission:
     Type: AWS::Lambda::Permission
     Properties:
