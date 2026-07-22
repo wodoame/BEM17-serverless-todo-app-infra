@@ -9,14 +9,14 @@ env:
   SAM_TEMPLATE: template.yaml
   TESTING_STACK_NAME: serverless-todo-app-test
   TESTING_APP_NAME: serverless-todo-app-test
-  TESTING_PIPELINE_EXECUTION_ROLE: arn:aws:iam::205930639565:role/aws-sam-cli-managed-test-pipe-PipelineExecutionRole-MeJc1QQbGhzR
-  TESTING_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::205930639565:role/aws-sam-cli-managed-test--CloudFormationExecutionRo-HcNxZMDU1rIK
+  TESTING_PIPELINE_EXECUTION_ROLE: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/aws-sam-cli-managed-test-pipe-PipelineExecutionRole-MeJc1QQbGhzR
+  TESTING_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/aws-sam-cli-managed-test--CloudFormationExecutionRo-HcNxZMDU1rIK
   TESTING_ARTIFACTS_BUCKET: aws-sam-cli-managed-test-pipeline--artifactsbucket-4wg6z15t2udq
   TESTING_REGION: us-east-1
   PROD_STACK_NAME: serverless-todo-app
   PROD_APP_NAME: serverless-todo-app
-  PROD_PIPELINE_EXECUTION_ROLE: arn:aws:iam::205930639565:role/aws-sam-cli-managed-prod-pipe-PipelineExecutionRole-8CPofylk4jq2
-  PROD_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::205930639565:role/aws-sam-cli-managed-prod--CloudFormationExecutionRo-6acTOS2GRSz8
+  PROD_PIPELINE_EXECUTION_ROLE: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/aws-sam-cli-managed-prod-pipe-PipelineExecutionRole-8CPofylk4jq2
+  PROD_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/aws-sam-cli-managed-prod--CloudFormationExecutionRo-6acTOS2GRSz8
   PROD_ARTIFACTS_BUCKET: aws-sam-cli-managed-prod-pipeline--artifactsbucket-vwh2aeanofxp
   PROD_REGION: us-east-1
 
