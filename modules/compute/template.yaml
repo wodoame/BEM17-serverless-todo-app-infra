@@ -31,6 +31,7 @@ Globals:
         TABLE_NAME: !Ref TasksTableName
 
 Resources:
+  # REST API fronting the CRUD Lambdas; every route requires a valid Cognito JWT
   TasksApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -49,6 +50,7 @@ Resources:
           CognitoAuthorizer:
             UserPoolArn: !Ref UserPoolArn
 
+  # Shared code (e.g. response helpers, table access) reused by all CRUD functions
   CommonLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -58,6 +60,7 @@ Resources:
         - python3.12
       RetentionPolicy: Delete
 
+  # POST /tasks; writes the new task and schedules its one-time expiry via EventBridge Scheduler
   CreateTaskFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -94,6 +97,7 @@ Resources:
             Path: /tasks
             Method: post
 
+  # GET /tasks; queries the caller's tasks, optionally filtered by status via the StatusIndex GSI
   ListTasksFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -117,6 +121,7 @@ Resources:
             Path: /tasks
             Method: get
 
+  # GET /tasks/{taskId}; fetches a single task by id
   GetTaskFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -138,6 +143,7 @@ Resources:
             Path: /tasks/{taskId}
             Method: get
 
+  # PATCH /tasks/{taskId}; updates task fields (e.g. marking it Completed cancels its expiry via the streams pipeline)
   UpdateTaskFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -159,6 +165,7 @@ Resources:
             Path: /tasks/{taskId}
             Method: patch
 
+  # DELETE /tasks/{taskId}; deletes a task (its removal cancels any pending expiry via the streams pipeline)
   DeleteTaskFunction:
     Type: AWS::Serverless::Function
     Properties:
