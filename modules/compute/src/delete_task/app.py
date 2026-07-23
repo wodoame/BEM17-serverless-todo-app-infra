@@ -1,3 +1,4 @@
+import logging
 import os
 
 import boto3
@@ -9,6 +10,9 @@ TABLE_NAME = os.environ["TABLE_NAME"]
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(TABLE_NAME)
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def handler(event, context):
@@ -22,6 +26,7 @@ def handler(event, context):
         )
     except ClientError as e:
         if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
+            logger.info("DeleteTask: task %s not found for user %s", task_id, user_id)
             return build_response(404, {"message": "Task not found"})
         raise
 

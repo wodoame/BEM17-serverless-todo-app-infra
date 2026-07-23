@@ -1,3 +1,4 @@
+import logging
 import os
 
 import boto3
@@ -9,6 +10,9 @@ TOPIC_ARN = os.environ["TOPIC_ARN"]
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(TABLE_NAME)
 sns = boto3.client("sns")
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def handler(event, context):
@@ -26,6 +30,7 @@ def handler(event, context):
         )
     except ClientError as e:
         if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
+            logger.info("Skipping expiry for task %s (user %s): no longer Pending", task_id, user_id)
             return
         raise
 
