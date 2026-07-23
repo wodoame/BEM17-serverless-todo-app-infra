@@ -18,11 +18,15 @@ Parameters:
     Type: String
 
 Resources:
+  # Fan-out topic for user notifications; PostAuthenticationFunction subscribes
+  # each user's email on first sign-in.
   NotificationsTopic:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: !Sub ${AppName}-notifications
 
+  # Cognito PostAuthentication trigger - subscribes the signed-in user's email
+  # to NotificationsTopic so future task notifications reach them.
   PostAuthenticationFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -41,12 +45,16 @@ Resources:
               Action: sns:Subscribe
               Resource: !Ref NotificationsTopic
 
+  # Catches CancellationQueue messages that fail delivery maxReceiveCount times
+  # (e.g. a persistent Scheduler API error) so they're never silently dropped.
   CancellationDeadLetterQueue:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub ${AppName}-cancellation-dlq.fifo
       FifoQueue: true
 
+  # FIFO so per-task cancellation messages (grouped by MessageGroupId=TaskId in
+  # StreamProcessorFunction) are processed in order and never in parallel for the same task.
   CancellationQueue:
     Type: AWS::SQS::Queue
     Properties:
@@ -56,6 +64,9 @@ Resources:
         deadLetterTargetArn: !GetAtt CancellationDeadLetterQueue.Arn
         maxReceiveCount: 5
 
+  # Consumes the Tasks table's DynamoDB Stream and publishes a cancellation
+  # message when a Pending task is Completed or Deleted before its deadline.
+  # FilterCriteria drops INSERT records at the event-source level so task creation never invokes this function.
   StreamProcessorFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -85,6 +96,8 @@ Resources:
               Filters:
                 - Pattern: '{"eventName": ["MODIFY", "REMOVE"]}'
 
+  # Deletes the EventBridge Scheduler schedule ("task-{TaskId}") for a
+  # cancelled task so its expiry handler never fires.
   CancellationFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -107,7 +120,8 @@ Resources:
           Type: SQS
           Properties:
             Queue: !GetAtt CancellationQueue.Arn
-            BatchSize: 1
+            BatchSize: 1 # BatchSize=1 so one task's Scheduler failure doesn't affect other messages in the same poll;
+
 
 Outputs:
   NotificationsTopicArn:
