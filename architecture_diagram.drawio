@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net">
   <diagram id="arch" name="Architecture">
-    <mxGraphModel dx="1835" dy="1124" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1400" math="0" shadow="0">
+    <mxGraphModel dx="2058" dy="1398" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1400" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -103,38 +103,93 @@
         <mxCell id="e_amplify_apigw" edge="1" parent="1" source="ic_amplify" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;" target="ic_apigw">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_apigw_create" edge="1" parent="1" source="ic_apigw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;" target="ic_create">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="e_apigw_create" edge="1" parent="1" source="ic_apigw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;exitX=0.15;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ic_create">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="98" y="754" />
+              <mxPoint x="256" y="754" />
+            </Array>
+          </mxGeometry>
         </mxCell>
-        <mxCell id="e_apigw_list" edge="1" parent="1" source="ic_apigw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;" target="ic_list">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="e_apigw_list" edge="1" parent="1" source="ic_apigw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;exitX=0.32;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ic_list">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="107" y="746" />
+              <mxPoint x="376" y="746" />
+            </Array>
+          </mxGeometry>
         </mxCell>
-        <mxCell id="e_apigw_get" edge="1" parent="1" source="ic_apigw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;" target="ic_get">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="e_apigw_get" edge="1" parent="1" source="ic_apigw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ic_get">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="116" y="738" />
+              <mxPoint x="496" y="738" />
+            </Array>
+          </mxGeometry>
         </mxCell>
-        <mxCell id="e_apigw_update" edge="1" parent="1" source="ic_apigw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;" target="ic_update">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="e_apigw_update" edge="1" parent="1" source="ic_apigw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;exitX=0.68;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ic_update">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="125" y="730" />
+              <mxPoint x="616" y="730" />
+            </Array>
+          </mxGeometry>
         </mxCell>
-        <mxCell id="e_apigw_delete" edge="1" parent="1" source="ic_apigw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;" target="ic_delete">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="e_apigw_delete" edge="1" parent="1" source="ic_apigw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;exitX=0.85;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ic_delete">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="134" y="722" />
+              <mxPoint x="736" y="722" />
+            </Array>
+          </mxGeometry>
         </mxCell>
-        <mxCell id="e_create_ddb" edge="1" parent="1" source="ic_create" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;" target="ic_dynamodb">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="e_create_ddb" edge="1" parent="1" source="ic_create" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.9;entryY=1;entryDx=0;entryDy=0;" target="ic_dynamodb">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="256" y="890" />
+              <mxPoint x="1087" y="890" />
+            </Array>
+          </mxGeometry>
         </mxCell>
-        <mxCell id="e_list_ddb" edge="1" parent="1" source="ic_list" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;" target="ic_dynamodb">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="e_list_ddb" edge="1" parent="1" source="ic_list" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.7;entryY=1;entryDx=0;entryDy=0;" target="ic_dynamodb">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="376" y="880" />
+              <mxPoint x="1076" y="880" />
+            </Array>
+          </mxGeometry>
         </mxCell>
-        <mxCell id="e_get_ddb" edge="1" parent="1" source="ic_get" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;" target="ic_dynamodb">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="e_get_ddb" edge="1" parent="1" source="ic_get" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="ic_dynamodb">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="496" y="870" />
+              <mxPoint x="1066" y="870" />
+            </Array>
+          </mxGeometry>
         </mxCell>
-        <mxCell id="e_update_ddb" edge="1" parent="1" source="ic_update" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;" target="ic_dynamodb">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="e_update_ddb" edge="1" parent="1" source="ic_update" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=1;entryDx=0;entryDy=0;" target="ic_dynamodb">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="616" y="860" />
+              <mxPoint x="1056" y="860" />
+            </Array>
+          </mxGeometry>
         </mxCell>
-        <mxCell id="e_delete_ddb" edge="1" parent="1" source="ic_delete" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;" target="ic_dynamodb">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="e_delete_ddb" edge="1" parent="1" source="ic_delete" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#5A6B7B;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.1;entryY=1;entryDx=0;entryDy=0;" target="ic_dynamodb">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="736" y="850" />
+              <mxPoint x="1045" y="850" />
+            </Array>
+          </mxGeometry>
         </mxCell>
-        <mxCell id="e_create_eventbridge" edge="1" parent="1" source="ic_create" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#ED7100;html=1;" target="ic_eventbridge">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="e_create_eventbridge" edge="1" parent="1" source="ic_create" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#ED7100;html=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ic_eventbridge">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="282" y="670" />
+              <mxPoint x="1366" y="670" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="e_eventbridge_expiry" edge="1" parent="1" source="ic_eventbridge" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#ED7100;html=1;" target="ic_expiry">
           <mxGeometry relative="1" as="geometry" />
@@ -143,7 +198,12 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e_expiry_sns" edge="1" parent="1" source="ic_expiry" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#ED7100;html=1;" target="ic_sns">
-          <mxGeometry relative="1" as="geometry" />
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1496" y="944.5" />
+              <mxPoint x="306" y="944.5" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="e_sns_user" edge="1" parent="1" source="ic_sns" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#ED7100;html=1;" target="ic_user">
           <mxGeometry relative="1" as="geometry" />
@@ -163,11 +223,23 @@
         <mxCell id="e_cancelfn_eventbridge" edge="1" parent="1" source="ic_cancelfn" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#8C4FFF;html=1;" target="ic_eventbridge">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_create_role" edge="1" parent="1" source="ic_create" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.2;strokeColor=#DD344C;dashed=1;html=1;" target="ic_role">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="e_create_role" edge="1" parent="1" source="ic_create" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.2;strokeColor=#DD344C;dashed=1;html=1;exitX=1;exitY=0.7;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ic_role">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="282" y="655" />
+              <mxPoint x="1629" y="655" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="e_eventbridge_role" edge="1" parent="1" source="ic_eventbridge" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.2;strokeColor=#DD344C;dashed=1;html=1;" target="ic_role">
-          <mxGeometry relative="1" as="geometry" />
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1366" y="849.5" />
+              <mxPoint x="1491.33" y="849.5" />
+              <mxPoint x="1491.33" y="857.67" />
+              <mxPoint x="1629" y="857.67" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="e_cw_auth" edge="1" parent="1" source="box_auth" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeWidth=1.2;strokeColor=#9AA5B1;dashed=1;html=1;" target="ic_cloudwatch">
           <mxGeometry relative="1" as="geometry" />
@@ -248,7 +320,7 @@
           <mxGeometry height="20" width="140" x="988" y="688" as="geometry" />
         </mxCell>
         <mxCell id="txt_dynamodb" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;whiteSpace=wrap;fontSize=10;fontColor=#2E27AD;" value="Tasks Table&#xa;PK UserId / SK TaskId&#xa;GSI StatusIndex&#xa;Streams: NEW_AND_OLD_IMAGES" vertex="1">
-          <mxGeometry height="60" width="180" x="988" y="814" as="geometry" />
+          <mxGeometry height="60" width="180" x="1068" y="814" as="geometry" />
         </mxCell>
         <mxCell id="txt_events_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;whiteSpace=wrap;fontSize=13;fontStyle=1;fontColor=#BC1356;" value="Events" vertex="1">
           <mxGeometry height="20" width="140" x="1288" y="688" as="geometry" />
@@ -257,7 +329,7 @@
           <mxGeometry height="40" width="150" x="1288" y="714" as="geometry" />
         </mxCell>
         <mxCell id="txt_expiry" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;whiteSpace=wrap;fontSize=11;fontColor=#D05C17;" value="ExpiryHandler&#xa;Lambda" vertex="1">
-          <mxGeometry height="30" width="140" x="1430" y="814" as="geometry" />
+          <mxGeometry height="30" width="140" x="1433" y="719" as="geometry" />
         </mxCell>
         <mxCell id="txt_role" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;whiteSpace=wrap;fontSize=10;fontColor=#C7131F;" value="SchedulerExecutionRole" vertex="1">
           <mxGeometry height="30" width="140" x="1560" y="816" as="geometry" />
@@ -302,7 +374,7 @@
           <mxGeometry height="16" width="100" x="130" y="650" as="geometry" />
         </mxCell>
         <mxCell id="lbl_streams" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;whiteSpace=wrap;fontSize=10;fontColor=#8C4FFF;" value="DynamoDB Streams&#xa;(MODIFY / REMOVE)" vertex="1">
-          <mxGeometry height="30" width="150" x="600" y="980" as="geometry" />
+          <mxGeometry height="30" width="150" x="494" y="974" as="geometry" />
         </mxCell>
         <mxCell id="lbl_sendmessage" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;whiteSpace=wrap;fontSize=10;fontColor=#8C4FFF;" value="SendMessage" vertex="1">
           <mxGeometry height="29" width="100" x="560" y="1085" as="geometry" />
@@ -320,7 +392,7 @@
           <mxGeometry height="16" width="80" x="1360" y="900" as="geometry" />
         </mxCell>
         <mxCell id="lbl_assumerole" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;whiteSpace=wrap;fontSize=10;fontColor=#DD344C;" value="assumes role" vertex="1">
-          <mxGeometry height="16" width="90" x="1592" y="746" as="geometry" />
+          <mxGeometry height="16" width="90" x="1158" y="631" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
